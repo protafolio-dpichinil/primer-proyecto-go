@@ -8,7 +8,7 @@ WORKDIR /app
 
 # Copiamos el código fuente de la aplicación.
 # Esto es necesario antes de inicializar el módulo Go para que `go mod tidy` pueda detectar dependencias.
-COPY *.go ./
+COPY . .
 
 # Inicializamos el módulo Go y generamos go.mod/go.sum si no existen.
 # Esto se hace dentro del contenedor para que no sea necesario tener Go instalado en el host.
