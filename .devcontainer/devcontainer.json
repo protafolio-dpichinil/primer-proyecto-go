@@ -14,7 +14,8 @@
 	// "features": {},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	// Reenviamos el puerto 8080 para poder acceder al microservicio desde el host.
+	"forwardPorts": [8080],
 	// Ejecuta 'go mod download' después de crear el contenedor para instalar dependencias.
 	"postCreateCommand": "go mod download",
 
