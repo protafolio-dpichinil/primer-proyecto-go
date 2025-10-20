@@ -1,14 +1,14 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/alpine
 {
-	"name": "Dev Container Go",
-	// Le indicamos que construya la imagen a partir de nuestro Dockerfile.
-   "build": {
-		"dockerfile": "../Dockerfile",
-		// Le indicamos que use la etapa 'builder' del Dockerfile para el entorno de desarrollo.
-		// Esto nos da acceso al SDK de Go y a las herramientas de compilación.
-		"target": "builder"
-	},
+	"name": "Go Development",
+	// Usamos una imagen pre-construida de Go para el desarrollo.
+	// Esto es más rápido que construir desde un Dockerfile cada vez.
+	"image": "mcr.microsoft.com/devcontainers/go:1.22",
+
+	// Montamos el código fuente local en el workspaceFolder del contenedor.
+	// Esto crea el "volumen" que mencionaste.
+	"workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind,consistency=cached",
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
@@ -30,7 +30,8 @@
             // Extensiones de VS Code que se instalarán automáticamente en el devcontainer.
             "extensions": [
                 "golang.go", // La extensión oficial de Go.
-                "GoogleCloudTools.cloudcode" // Extensión de Gemini Code Assist
+                "GoogleCloudTools.cloudcode", // Extensión de Gemini Code Assist
+                "yzhang.markdown-all-in-one"  // IntelliSense y herramientas para Markdown
             ],
             // Configuraciones del editor que se aplicarán en el contenedor.
             "settings": {

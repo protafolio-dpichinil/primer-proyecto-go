@@ -1,31 +1,38 @@
-# --- Etapa 1: Compilación (builder) ---
-# Usamos una imagen oficial de Go como base para compilar la aplicación.
-# Se recomienda usar una versión específica para compilaciones reproducibles.
-FROM golang:1.22 AS builder
+# --- Etapa 1: Builder ---
+# Usamos una imagen de Go para compilar nuestra aplicación.
+FROM golang:1.22-alpine AS builder
 
 # Establecemos el directorio de trabajo dentro del contenedor.
 WORKDIR /app
 
-# Copiamos el código fuente de la aplicación.
-# Esto es necesario antes de inicializar el módulo Go para que `go mod tidy` pueda detectar dependencias.
-COPY . .
-
-# Inicializamos el módulo Go y generamos go.mod/go.sum si no existen.
-# Esto se hace dentro del contenedor para que no sea necesario tener Go instalado en el host.
-# '|| true' asegura que el comando no falle si go.mod ya existe (por ejemplo, en reconstrucciones).
-RUN go mod init primer-proyecto || true
-RUN go mod tidy
+# Copiamos los archivos de módulos de Go.
+# Esto aprovecha el cache de Docker: si no cambian, no se vuelven a descargar las dependencias.
+COPY go.mod go.sum ./
 
 # Descargamos las dependencias del proyecto.
 RUN go mod download
 
-# Compilamos la aplicación Go.
-# -o /app/main crea el ejecutable llamado 'main' en el directorio /app.
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/main .
+# Copiamos el resto del código fuente de la aplicación.
+COPY . .
 
-# --- Etapa 2: Ejecución (final) ---
-# Usamos una imagen base mínima para la imagen final, lo que reduce su tamaño.
+# Compilamos la aplicación.
+# -o /app/main: Especifica que el ejecutable de salida se llame 'main' y se guarde en /app.
+# CGO_ENABLED=0: Deshabilita CGO para crear un binario estático, lo que lo hace más portable.
+RUN CGO_ENABLED=0 go build -o /app/main .
+
+# --- Etapa 2: Final ---
+# Usamos una imagen mínima de Alpine para la imagen final.
+# Esto reduce significativamente el tamaño de la imagen final.
 FROM alpine:latest
-WORKDIR /root/
+
+# Establecemos el directorio de trabajo.
+WORKDIR /app
+
+# Copiamos solo el binario compilado desde la etapa 'builder'.
 COPY --from=builder /app/main .
-CMD ["./main"]
+
+# Exponemos el puerto 8080 para que el microservicio sea accesible.
+EXPOSE 8080
+
+# El comando que se ejecutará cuando el contenedor inicie.
+CMD ["/app/main"]
