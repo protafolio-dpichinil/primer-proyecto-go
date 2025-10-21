@@ -17,7 +17,7 @@ func NewClientRouter() *ClientRouter {
 		routes: make(map[string]http.HandlerFunc),
 	}
 	router.routes["list"] = clientListHandler
-	router.routes["/get"] = clientGetHandler
+	router.routes["get"] = clientGetHandler
 
 	return router
 }
